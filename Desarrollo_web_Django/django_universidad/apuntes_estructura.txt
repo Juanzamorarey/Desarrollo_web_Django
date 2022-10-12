@@ -1,0 +1,88 @@
+Cada proyecto de django tendrá:
+
+manage.py -->
+
+__init__.py ->
+
+asgi.py ->
+
+settings.py -> configura datos importantes del proyecto
+
+utls.py -> diccionario que permite indicar las urls de nuestro proyecto
+
+wsgi.py ->
+
+MODELO VISTA TEMPLATE 
+
+Si vemos la imagen adjunta podemos entender cómo funciona el modelo vista template de django. Se va a indicar al navegador una URL. Esta URL llamará a una vista
+contenida en la carpeta views.py. Ls vista tiene una lógica de modelo que interactúa con la BBDD, devuelve por tanto una respuesta a la vista que, en función
+de dicha respuesta invocará una plantilla que será lo que visualizará el usuario quien, a su vez, invocará otra URL repitiendo el proceso. Las plantillas
+puede contener código javascript y CSS.
+
+
+En la carpeta llamada Modulos lo que vamos a hacer es crear todas las aplicaciones que luego Django va a utilizar en el conjunto del proyecto. Por ejemplo
+en nuestro proyecto estamos creando una univerisdad por lo que la estructura correspondiente de django sería por ejemplo la siguiente:
+
+PROYECTO DJANGO Universidad {
+    "parte académica"
+    "tesorería"
+    "investigación"
+}
+
+Para crear un nuevo modulo o aplicación usamos el comando django-admin startapp Academica
+
+Esto nos va a generar una serie de archivos en la carptea de destino:
+
+models.py -> Aquñi se registran los modelos que después se mostrarán como tablas en la BBDD
+
+views.py 
+
+admin.py -> registrar las entidades que vamos amodificar
+
+migrations -> reflejar lo que se crea en la BBDD
+
+En nuestro caso vamos a necesitar 4 tablas. Una para los alumnos, otra para las carreras, otra para las matriculas y otra para los cursos. Todas con sus dependencias propias mutuas. 
+Esto lo crearemos en models.py dentro de nuestra app. Aunque se creen como objetos el interprete luego lo cambiará dando lugar a tablas clásicas de BBDD relacionales.
+
+Una vez se hayan creado nuestras tablas en models el siguiente paso será registrar los modelos creados en admin.py 
+Para poder ver nuestra app/página o tener la BBDD debemos usar el archivo manage.py que es el que lleva toda la lógica del proyecto.
+Para actualizar la BBDD "python manage.py migrate" y después registramos el módulo Academica en settings.py. Para ello vamos a Installed APPS y allí introducimos el modulo correcto
+y damos el comando "python manage.py makemigrations". Antes de esto asegúrate de que en apps.py tienes exactamente el mismo nombre que has puesto en INSTALLED_APPS (incluyendo la ruta)
+
+Con el objetivo de administrar el sitio desde la página de administración por defecto de django necesitamos crear superusuarios. el comando correcto para esto es 
+"python manage.py createsuperuser".
+
+Para correr la página en el servidor local debemos utilizar el siguiente comando:
+
+python manage.py runserver
+
+Una vez hagamos esto tendremos nuestra página corriendo en el servidor. Si queremos ir accediendo a las diferentes páginas que esta proporciona solamente añadiremos "/admin" para poder
+acceder a la parte de administración de la página. Esto nos mostrará un panel de administración completo en el cual vamos a poder gestionar nuestros modelos, las tablas que forman parte
+de la base de datos. 
+
+Como vemos hasta ahora nuestro modelos tiene el problema de que los identificadores son el DNI para el alumno (lo que complica reconocerlo), y las carreras tienen el string "object" delante
+porque no hemos sobreecrito el método string de la clase. 
+
+
+Una vez que tenemos preparadas nuestras BBDD tenemos ahora que preparar la apariencia de nuestra aplicación. Estas "apariencias" tienen una lógica propia
+la cual viene determinaada en "views.py" dentro de la carpeta de la aplicación. Aquí debemos crear una función la cual lo que hace es devolver el hmtl renderizado para que pueda ser visto 
+por un browser.
+
+Las vistas siempre reciben una petición y retornan un render. Es decir reciben una petición del usuario diciendo lo que quieren ver y devuleven la pantalla que queremos. Esto puede 
+realizarse con una sencilla función pero, una vez esta esté creada tenemos que agragarla al apartado de Templates dentro de settings.py, concretamente en DIRS. Aquí debemos poner 
+la ruta en la que se encuentra la carpeta "plantillas" y a su vez debemos ir también a urls.py donde debemos configurar dicha plantilla. Aquí indicaremos con la función "path" el nombre
+que le queremos dar a esa página y el nombre de la función definida en "views.py", en este caso formularioContacto. Es importante en "urls.py" importar también la función que vamos a usar 
+es decir, formularioContacto. 
+
+En el html en todos aquellos lugares en lso que se realicen llamads post o get es importante introducir el csrf_token, el cual evita problemas de introducción de comandos maliciosos por parte 
+de los usuarios. En nuestro formulario por ejemplo se haría de la siguiente manera:
+
+<form action="/contactar/", method="POST">{% csrf_token %}
+
+estamos invocando un metodo POST para redirigir a otro html pero se requiere el csrf_token para que esta acción pueda llevarse a cabo.
+
+EXTRA:
+
+Este comando resincroniza la BBDD en caso de que haya algun problema. Es bastante útil si te has confundido o hay algún problema
+
+python manage.py migrate --run-syncdb
